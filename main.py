@@ -14,6 +14,7 @@ options = [
 
 assert experiment in ["sample", "preprocess", "espnet"]
 
+# generate prediction file
 if experiment.startswith("sample"):
     task_root = "dynamic_superb/benchmark_tasks"
     save_root = "results"
@@ -28,6 +29,7 @@ if experiment.startswith("sample"):
                 --download_dir {download_dir} \
                  "
 
+# data preprocess
 elif experiment.startswith("preprocess"):
     task_root = "../../dynamic_superb/benchmark_tasks"
     save_root = "../../data"
@@ -42,6 +44,7 @@ elif experiment.startswith("preprocess"):
                 --save_dir {save_path} "
     if multi_uttrs: COMMAND += "--multi_uttrs "
 
+# inference
 elif experiment.startswith("espnet"):
     mode = "store-result"
     opt = 5
