@@ -1,0 +1,6 @@
+install.sh
+SCTK
+**/data
+**/dump
+**/exp
+**/valid.acc.ave.pth

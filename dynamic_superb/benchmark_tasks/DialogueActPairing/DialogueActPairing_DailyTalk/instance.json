@@ -1,0 +1,10 @@
+{
+    "name": "DialogueActPairing_DailyTalk",
+    "description": "",
+    "keywords": "",
+    "metrics": [
+        "accuracy"
+    ],
+    "path": "DynamicSuperb/DialogueActPairing_DailyTalk",
+    "version": "e3c3ad09f32a26c533eb87e1c30bb794beac8727"
+}

@@ -1,0 +1,10 @@
+{
+    "name": "SpeakerVerification_LibriSpeech-TestClean",
+    "description": "",
+    "keywords": "",
+    "metrics": [
+        "accuracy"
+    ],
+    "path": "DynamicSuperb/SpeakerVerification_LibriSpeech-TestClean",
+    "version": "c3a125e63523f1ea742059ac46f137aaa60c19d8"
+}

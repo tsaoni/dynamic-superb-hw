@@ -1,0 +1,10 @@
+{
+    "name": "NoiseSNRLevelPrediction_VCTK_MUSAN-Speech",
+    "description": "",
+    "keywords": "",
+    "metrics": [
+        "accuracy"
+    ],
+    "path": "DynamicSuperb/NoiseSNRLevelPrediction_VCTK_MUSAN-Speech",
+    "version": "64bdc0825c73977d8ab965301eb48b03d8b30c12"
+}
