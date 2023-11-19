@@ -12,18 +12,39 @@ options = [
     ("SpeakerCounting", "SpeakerCounting_LibriTTS-TestClean")
 ]
 
-assert experiment in ["sample", "preprocess", "espnet"]
+assert experiment in ["sample", "preprocess", "espnet", "multimodel-llama"]
 
-# generate prediction file
+# test
 if experiment.startswith("sample"):
     task_root = "dynamic_superb/benchmark_tasks"
-    save_root = "results"
+    save_root = "results/whisper"
+    loop = 1
+    if loop:
+        for i in range(6):
+            opt = i
+            mode = "analysis"
+            task, instance = options[opt]
+            json_path = os.path.join(task_root, task, instance, "instance.json")
+            save_path = os.path.join(save_root, task, instance, "prediction.json")
+            download_dir = os.environ.get("HF_DATASETS_CACHE")
+            assert mode in ["gen-predict", "analysis"]
+            COMMAND = f"python sample.py \
+                        --mode {mode} \
+                        --json_path {json_path} \
+                        --save_path {save_path} \
+                        --download_dir {download_dir} \
+                        "
+            os.system(COMMAND)
+        exit(-1)
     opt = 5
+    mode = "analysis"
     task, instance = options[opt]
     json_path = os.path.join(task_root, task, instance, "instance.json")
     save_path = os.path.join(save_root, task, instance, "prediction.json")
     download_dir = os.environ.get("HF_DATASETS_CACHE")
+    assert mode in ["gen-predict", "analysis"]
     COMMAND = f"python sample.py \
+                --mode {mode} \
                 --json_path {json_path} \
                 --save_path {save_path} \
                 --download_dir {download_dir} \
@@ -81,5 +102,21 @@ elif experiment.startswith("espnet"):
         for s, t in zip(source_dir, target_dir):
             shutil.move(s, t)
         exit(-1)
+
+# whisper-LLM
+elif experiment.startswith("multimodel-llama"):
+    opt = 5
+    data_root = "../data"
+    task, instance = options[opt]
+    data_path = os.path.join(data_root, task)
+    os.chdir("multimodal-llama")
+    COMMAND = f"echo '{instance}' > data/test_dataset.txt ; \
+                python dynamicsuperb_inference.py \
+                --model_path ckpts/dynamic-superb/whisper-llama-latest.pth \
+                --encoder_type whisper \
+                --output_dir ../results/whisper/{task} \
+                --dataset_list data/test_dataset.txt \
+                --data_path {data_path} \
+                --llama_path ckpts/llama_model_weights "
 
 os.system(COMMAND)

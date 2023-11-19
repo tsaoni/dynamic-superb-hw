@@ -1,0 +1,14 @@
+[2023-11-13 22:54:52] [INFO] pretrained_path: ckpts/dynamic-superb/whisper-llama-latest.pth
+[2023-11-13 22:54:52] [INFO] result_path: ../results/whisper/SpeakerCounting
+[2023-11-13 22:54:52] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
+[2023-11-13 22:54:52] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
+[2023-11-13 22:55:03] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
+[2023-11-13 22:55:03] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
+[2023-11-13 22:55:13] [INFO] Loading faiss with AVX2 support.
+[2023-11-13 22:55:13] [INFO] Successfully loaded faiss with AVX2 support.
+[2023-11-13 22:55:24] [INFO] <All keys matched successfully>
+[2023-11-13 22:55:27] [INFO] SpeakerCounting_LibriTTS-TestClean
+[2023-11-13 22:58:02] [INFO] 1737 / 2000
+[2023-11-13 22:58:02] [INFO] ====================================================================================================
+[2023-11-13 22:58:02] [INFO] 
+[2023-11-13 22:58:02] [INFO] Dataset not found

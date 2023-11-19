@@ -1,0 +1,14 @@
+[2023-11-13 22:51:14] [INFO] pretrained_path: ckpts/dynamic-superb/whisper-llama-latest.pth
+[2023-11-13 22:51:14] [INFO] result_path: ../results/whisper/DialogueActClassification
+[2023-11-13 22:51:14] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
+[2023-11-13 22:51:14] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
+[2023-11-13 22:51:26] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
+[2023-11-13 22:51:26] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
+[2023-11-13 22:51:37] [INFO] Loading faiss with AVX2 support.
+[2023-11-13 22:51:37] [INFO] Successfully loaded faiss with AVX2 support.
+[2023-11-13 22:51:49] [INFO] <All keys matched successfully>
+[2023-11-13 22:51:52] [INFO] DialogueActClassification_DailyTalk
+[2023-11-13 22:54:34] [INFO] 1242 / 2000
+[2023-11-13 22:54:34] [INFO] ====================================================================================================
+[2023-11-13 22:54:34] [INFO] 
+[2023-11-13 22:54:34] [INFO] Dataset not found
