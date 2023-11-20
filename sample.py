@@ -171,7 +171,7 @@ def main(args) -> None:
                 for i in range(n_data_per_label):
                     data_dict["instruction"].append(random.sample(instr_options, 1)[0])
                     data_dict["label"].append(label)
-                    data_dict["file"] = f"{str(counter).zfill(5)}.wav"
+                    data_dict["file"].append(f"{str(counter).zfill(5)}.wav")
                     if label == "match":
                         a1, a2 = random.sample(audio_dict[caption_lst[i]], 2)
                     elif label == "mismatch":
