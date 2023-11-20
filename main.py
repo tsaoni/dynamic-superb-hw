@@ -1,15 +1,16 @@
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "6"
 
-experiment = "sample"
+experiment = "multimodel-llama"
 options = [
     ("EnvironmentalSoundClassification", "EnvironmentalSoundClassification_ESC50-Animals"), 
     ("SpeechTextMatching", "SpeechTextMatching_LJSpeech"), 
     ("NoiseSNRLevelPrediction", "NoiseSNRLevelPrediction_VCTK_MUSAN-Gaussian"), 
     ("SpoofDetection", "SpoofDetection_ASVspoof2017"), 
     ("DialogueActClassification", "DialogueActClassification_DailyTalk"), 
-    ("SpeakerCounting", "SpeakerCounting_LibriTTS-TestClean")
+    ("SpeakerCounting", "SpeakerCounting_LibriTTS-TestClean"),
+    ("SourceDetection", "SourceDetection_mb23-music_caps_4sec_wave_type"), 
 ]
 
 assert experiment in ["sample", "preprocess", "espnet", "multimodel-llama", "test"]
@@ -25,7 +26,7 @@ elif experiment.startswith("sample"):
     if loop:
         for i in range(6):
             opt = i
-            mode = "analysis"
+            mode = "gen-predict"
             task, instance = options[opt]
             json_path = os.path.join(task_root, task, instance, "instance.json")
             save_path = os.path.join(save_root, task, instance, "prediction.json")
@@ -39,8 +40,8 @@ elif experiment.startswith("sample"):
                         "
             os.system(COMMAND)
         exit(-1)
-    opt = 5
-    mode = "create-instance"
+    opt = -1
+    mode = "gen-predict"
     task, instance = options[opt]
     json_path = os.path.join(task_root, task, instance, "instance.json")
     save_path = os.path.join(save_root, task, instance, "prediction.json")
@@ -108,7 +109,7 @@ elif experiment.startswith("espnet"):
 
 # whisper-LLM
 elif experiment.startswith("multimodel-llama"):
-    opt = 5
+    opt = -1
     data_root = "../data"
     task, instance = options[opt]
     data_path = os.path.join(data_root, task)
@@ -121,5 +122,6 @@ elif experiment.startswith("multimodel-llama"):
                 --dataset_list data/test_dataset.txt \
                 --data_path {data_path} \
                 --llama_path ckpts/llama_model_weights "
+
 
 os.system(COMMAND)

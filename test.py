@@ -3,9 +3,9 @@ import os, json
 import random
 import time
 
-mode = "hugchat"
+mode = "instance"
 
-assert mode in ["test", "spoken", "hugchat"]
+assert mode in ["test", "spoken", "hugchat", "instance"]
 
 if mode.startswith("test"):
     from jiwer import wer
@@ -17,6 +17,31 @@ if mode.startswith("test"):
         error = wer(reference, hypothesis)
         import pdb 
         pdb.set_trace()
+
+elif mode.startswith("instance"):
+    hf_root = "DynamicSuperb"
+    origin_task_root = "../dynamic-superb/dynamic_superb/benchmark_tasks"
+    task_root = "dynamic_superb/benchmark_tasks"
+    task = "SourceDetection"
+    instance = "SourceDetection_mb23-music_caps_4sec_wave_type"
+    target_path = os.path.join(task_root, task, instance)
+    os.makedirs(target_path, exist_ok=True)
+    json_path = os.path.join(target_path, "instance.json")
+    metadata = {
+        "name": instance, 
+        "description": "", 
+        "keywords": "", 
+        "metrics": [
+            "accuracy", 
+        ], 
+        "path": os.path.join(hf_root, instance), 
+        "version": "e7867f8dd19e37e86ba50d66aaf4ae764d961d71", 
+    }
+    json.dump(metadata, open(json_path, "w"), indent=4)
+    readme_paths = [os.path.join(task_root, task), os.path.join(task_root, task, instance)]
+    for p in readme_paths:
+        open(os.path.join(p, "README.md"), "w").write("")
+
 elif mode.startswith("spoken"):
     data_root = "Spoken-SQuAD"
     dataset_root = f"{data_root}/Spoken-SQuAD_audio"
