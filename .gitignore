@@ -3,5 +3,8 @@ SCTK
 **/data
 **/dump
 **/exp
+**/cookies_snapshot
 **/valid.acc.ave.pth
 **/ckpts
+secret_token.sh
+**/tmp

@@ -5,4 +5,5 @@ export WANDB_CONFIG_DIR=/tmp2/yuling/.config/wandb
 export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 
 unset LD_LIBRARY_PATH
+. secret_token.sh
 python main.py

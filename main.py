@@ -12,13 +12,16 @@ options = [
     ("SpeakerCounting", "SpeakerCounting_LibriTTS-TestClean")
 ]
 
-assert experiment in ["sample", "preprocess", "espnet", "multimodel-llama"]
+assert experiment in ["sample", "preprocess", "espnet", "multimodel-llama", "test"]
 
 # test
-if experiment.startswith("sample"):
+if experiment.startswith("test"):
+    COMMAND = "python test.py"
+
+elif experiment.startswith("sample"):
     task_root = "dynamic_superb/benchmark_tasks"
     save_root = "results/whisper"
-    loop = 1
+    loop = 0
     if loop:
         for i in range(6):
             opt = i
@@ -37,12 +40,12 @@ if experiment.startswith("sample"):
             os.system(COMMAND)
         exit(-1)
     opt = 5
-    mode = "analysis"
+    mode = "create-instance"
     task, instance = options[opt]
     json_path = os.path.join(task_root, task, instance, "instance.json")
     save_path = os.path.join(save_root, task, instance, "prediction.json")
     download_dir = os.environ.get("HF_DATASETS_CACHE")
-    assert mode in ["gen-predict", "analysis"]
+    assert mode in ["gen-predict", "analysis", "create-instance"]
     COMMAND = f"python sample.py \
                 --mode {mode} \
                 --json_path {json_path} \

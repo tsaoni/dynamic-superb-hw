@@ -6,36 +6,17 @@ from pathlib import Path
 from typing import Optional
 import numpy as np
 import pandas as pd
+from collections import defaultdict
+import random
 from typing import List, Optional, Tuple
+import soundfile as sf
+import io
+from scipy.io.wavfile import write
 
-from datasets import load_dataset
+from datasets import load_dataset, Dataset, DatasetDict, Audio
 from tqdm import tqdm
 
-class BaseModel:
-    def __init__(self):
-        pass
-
-    def forward(
-        self,
-        speech_inputs: List[Tuple[np.ndarray, int]],
-        text_inputs: List[str],
-        instr: str,
-    ) -> Tuple[List[np.ndarray], List[str]]:
-        """
-        The forward function is designed to infer a single example (i.e., batch_size = 1).
-
-        Input arguments:
-            speech_inputs: A list of utterances. Each utterance is represented as a NumPy array, accompanied by its sampling rate.
-            text_inputs: A list of texts. Each text is of type "str".
-            instr: The instruction specifying the task.
-        Output arguments:
-            speech_outputs: A list of utterances. Each utterance is represented as a NumPy array, accompanied by its sampling rate.
-            text_outputs: A list of texts. Each text is of type "str".
-
-        """
-
-        # Since this is a dummy model, we just return the inputs.
-        return speech_inputs, text_inputs
+from utils import *
 
 # DO NOT change the following constants.
 SEED = 42
@@ -154,6 +135,58 @@ def main(args) -> None:
         os.makedirs(img_path, exist_ok=True)
         img_path = os.path.join(img_path, f"{mode}.png")
         plt.get_figure().savefig(img_path)
+
+    elif args.mode == "create-instance":
+        audio_dataset = "mb23/music_caps_4sec_wave_type"
+        dataset = load_dataset(audio_dataset, split="train")
+        audio_dict = defaultdict(list)
+        caption_lst = []
+        os.makedirs("tmp", exist_ok=True)
+        for index, example in tqdm(enumerate(dataset)):
+            caption = example['caption']
+            number, audio = example['number'], example['audio']
+            save_path = f"tmp/{str(index).zfill(5)}.wav"
+            sf.write(save_path, audio['array'], audio['sampling_rate'])
+            audio['path'] = save_path
+            #bytes_wav = bytes()
+            #byte_io = io.BytesIO(bytes_wav)
+            #write(byte_io, audio['sampling_rate'], audio['array'])
+            #audio = byte_io.read()
+            audio_dict[caption].append((number, audio))
+            caption_lst.append(caption)
+        caption_lst = list(set(caption_lst))
+        ins_type = "match"
+        assert ins_type in ["match", "continue", "caption"]
+        if ins_type == "match":
+            data_dict = defaultdict(list)
+            instr_options = [
+                "According to the given two audio signals, decide whether they are from the same source. Please answer with `match` or `mismatch`.", 
+            ]
+            instr_options = instructions[ins_type]
+            label_options = ["match", "mismatch"]
+            n_data_per_label = 1500
+            counter = 0
+            print("[INFO]: generating data")
+            for label in tqdm(label_options):
+                for i in range(n_data_per_label):
+                    data_dict["instruction"].append(random.sample(instr_options, 1)[0])
+                    data_dict["label"].append(label)
+                    data_dict["file"] = f"{str(counter).zfill(5)}.wav"
+                    if label == "match":
+                        a1, a2 = random.sample(audio_dict[caption_lst[i]], 2)
+                    elif label == "mismatch":
+                        a1 = random.sample(audio_dict[caption_lst[i]], 1)[0]
+                        a2 = random.sample(audio_dict[caption_lst[i + 1]], 1)[0]
+                    data_dict["audio"].append(a1[-1])
+                    data_dict["audio2"].append(a2[-1])
+                    counter += 1
+        #audio, instruction, label
+        dataset = Dataset.from_dict(data_dict)
+        print("[INFO]: cast to audio")
+        dataset = DatasetDict({"test": dataset}).cast_column("audio", Audio()).cast_column("audio2", Audio())
+
+        print("[INFO]: push to hub")
+        dataset.push_to_hub("DynamicSuperb/SourceDetection_mb23-music_caps_4sec_wave_type")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
