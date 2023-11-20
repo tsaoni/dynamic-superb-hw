@@ -1,6 +1,5 @@
 install.sh
 SCTK
-**/data
 **/dump
 **/exp
 **/cookies_snapshot
