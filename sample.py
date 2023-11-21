@@ -20,7 +20,7 @@ from utils import *
 
 # DO NOT change the following constants.
 SEED = 42
-SAMPLE_NUM = 2000
+SAMPLE_NUM = 3000
 
 def main(args) -> None:
 
@@ -72,6 +72,7 @@ def main(args) -> None:
             speech_sr = example["audio"]["sampling_rate"]
             instr = example["instruction"]
             text_label = example["label"]
+            #num1, num2 = example["number"], example["number2"]
 
             # if file_name in [x[0] for x in results]: continue
             # else:
@@ -97,7 +98,7 @@ def main(args) -> None:
             json.dump(predictions, f, indent=4)
     elif args.mode == "analysis":
         predictions = json.load(args.save_path.open())
-        mode = "label-pred-dist"
+        mode = "pred-dist"
         assert mode in ["label-pred-dist", "pred-dist", "corr"]
         if mode == "label-pred-dist":
             labels = [p["label"] for p in predictions]
@@ -156,29 +157,54 @@ def main(args) -> None:
             caption_lst.append(caption)
         caption_lst = list(set(caption_lst))
         ins_type = "match"
+        task_type = "1"
         assert ins_type in ["match", "continue", "caption"]
         if ins_type == "match":
             data_dict = defaultdict(list)
             instr_options = [
-                "According to the given two audio signals, decide whether they are from the same source. Please answer with `match` or `mismatch`.", 
+                "According to the given two audio signals, decide whether two sound signals are continuous. Please answer with `yes` or `no`.", 
             ]
-            instr_options = instructions[ins_type]
-            label_options = ["match", "mismatch"]
+            if task_type == "0":
+                instr_options = instructions[ins_type]
+                label_options = ["match", "mismatch"]
+                task_name = "DynamicSuperb/SourceDetection_mb23-music_caps_4sec_wave_type"
+            elif task_type == "1":
+                label_options = ["yes", "no"]
+                task_name = "DynamicSuperb/SourceDetection_mb23-music_caps_4sec_wave_type_continuous"
             n_data_per_label = 1500
             counter = 0
             print("[INFO]: generating data")
             for label in tqdm(label_options):
                 for i in range(n_data_per_label):
                     data_dict["instruction"].append(random.sample(instr_options, 1)[0])
-                    data_dict["label"].append(label)
-                    data_dict["file"].append(f"{str(counter).zfill(5)}.wav")
+                    #data_dict["file"].append(f"{str(counter).zfill(5)}.wav")
                     if label == "match":
                         a1, a2 = random.sample(audio_dict[caption_lst[i]], 2)
+                        data_dict["label"].append(label)
                     elif label == "mismatch":
                         a1 = random.sample(audio_dict[caption_lst[i]], 1)[0]
                         a2 = random.sample(audio_dict[caption_lst[i + 1]], 1)[0]
+                        data_dict["label"].append(label)
+                    elif label == "yes":
+                        a1 = audio_dict[caption_lst[counter]][0]
+                        a2 = audio_dict[caption_lst[counter]][1]
+                        data_dict["label"].append(label)
+                    elif label == "no":
+                        if len(audio_dict[caption_lst[counter]]) < 3:
+                            a1 = audio_dict[caption_lst[counter]][0]
+                            a2 = audio_dict[caption_lst[counter]][1]
+                            data_dict["label"].append("yes")
+                        else:
+                            a1 = audio_dict[caption_lst[counter]][0]
+                            a2 = audio_dict[caption_lst[counter]][2]
+                            data_dict["label"].append(label)
+
                     data_dict["audio"].append(a1[-1])
                     data_dict["audio2"].append(a2[-1])
+                    data_dict["file"].append(f"{label}_{i}_0.wav") #a1[-1]["path"]
+                    data_dict["file2"].append(f"{label}_{i}_1.wav") #a2[-1]["path"]
+                    data_dict["number"].append(a1[0])
+                    data_dict["number2"].append(a2[0])
                     counter += 1
         #audio, instruction, label
         dataset = Dataset.from_dict(data_dict)
@@ -186,7 +212,7 @@ def main(args) -> None:
         dataset = DatasetDict({"test": dataset}).cast_column("audio", Audio()).cast_column("audio2", Audio())
 
         print("[INFO]: push to hub")
-        dataset.push_to_hub("DynamicSuperb/SourceDetection_mb23-music_caps_4sec_wave_type")
+        dataset.push_to_hub(task_name)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

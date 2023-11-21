@@ -23,7 +23,7 @@ elif mode.startswith("instance"):
     origin_task_root = "../dynamic-superb/dynamic_superb/benchmark_tasks"
     task_root = "dynamic_superb/benchmark_tasks"
     task = "SourceDetection"
-    instance = "SourceDetection_mb23-music_caps_4sec_wave_type"
+    instance = "SourceDetection_mb23-music_caps_4sec_wave_type_continuous"
     target_path = os.path.join(task_root, task, instance)
     os.makedirs(target_path, exist_ok=True)
     json_path = os.path.join(target_path, "instance.json")
@@ -35,7 +35,7 @@ elif mode.startswith("instance"):
             "accuracy", 
         ], 
         "path": os.path.join(hf_root, instance), 
-        "version": "e7867f8dd19e37e86ba50d66aaf4ae764d961d71", 
+        "version": "d9498d5174914ad15327519d3ee7c60e0d64c2b8", 
     }
     json.dump(metadata, open(json_path, "w"), indent=4)
     readme_paths = [os.path.join(task_root, task), os.path.join(task_root, task, instance)]

@@ -1,0 +1,10 @@
+{
+    "name": "SourceDetection_mb23-music_caps_4sec_wave_type_continuous",
+    "description": "",
+    "keywords": "",
+    "metrics": [
+        "accuracy"
+    ],
+    "path": "DynamicSuperb/SourceDetection_mb23-music_caps_4sec_wave_type_continuous",
+    "version": "d9498d5174914ad15327519d3ee7c60e0d64c2b8"
+}

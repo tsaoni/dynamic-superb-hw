@@ -2,7 +2,7 @@ import os
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "6"
 
-experiment = "multimodel-llama"
+experiment = "preprocess"
 options = [
     ("EnvironmentalSoundClassification", "EnvironmentalSoundClassification_ESC50-Animals"), 
     ("SpeechTextMatching", "SpeechTextMatching_LJSpeech"), 
@@ -11,6 +11,7 @@ options = [
     ("DialogueActClassification", "DialogueActClassification_DailyTalk"), 
     ("SpeakerCounting", "SpeakerCounting_LibriTTS-TestClean"),
     ("SourceDetection", "SourceDetection_mb23-music_caps_4sec_wave_type"), 
+    ("SourceDetection", "SourceDetection_mb23-music_caps_4sec_wave_type_continuous"), 
 ]
 
 assert experiment in ["sample", "preprocess", "espnet", "multimodel-llama", "test"]
@@ -41,7 +42,7 @@ elif experiment.startswith("sample"):
             os.system(COMMAND)
         exit(-1)
     opt = -1
-    mode = "gen-predict"
+    mode = "create-instance"
     task, instance = options[opt]
     json_path = os.path.join(task_root, task, instance, "instance.json")
     save_path = os.path.join(save_root, task, instance, "prediction.json")
@@ -58,11 +59,11 @@ elif experiment.startswith("sample"):
 elif experiment.startswith("preprocess"):
     task_root = "../../dynamic_superb/benchmark_tasks"
     save_root = "../../data"
-    opt = 0
+    opt = -1
     task, instance = options[opt]
     json_path = os.path.join(task_root, task, instance, "instance.json")
     save_path = os.path.join(save_root, task, instance)
-    multi_uttrs = 0
+    multi_uttrs = 1
     os.chdir("api/preprocess")
     COMMAND = f"python process_instance.py \
                 --json_path {json_path} \
