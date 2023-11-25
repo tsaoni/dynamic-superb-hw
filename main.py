@@ -1,8 +1,9 @@
 import os
+from argparse import Namespace
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "6"
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
-experiment = "preprocess"
+experiment = "SALMONN"
 options = [
     ("EnvironmentalSoundClassification", "EnvironmentalSoundClassification_ESC50-Animals"), 
     ("SpeechTextMatching", "SpeechTextMatching_LJSpeech"), 
@@ -10,11 +11,11 @@ options = [
     ("SpoofDetection", "SpoofDetection_ASVspoof2017"), 
     ("DialogueActClassification", "DialogueActClassification_DailyTalk"), 
     ("SpeakerCounting", "SpeakerCounting_LibriTTS-TestClean"),
-    ("SourceDetection", "SourceDetection_mb23-music_caps_4sec_wave_type"), 
-    ("SourceDetection", "SourceDetection_mb23-music_caps_4sec_wave_type_continuous"), 
+    #("SourceDetection", "SourceDetection_mb23-music_caps_4sec_wave_type"), 
+    #("SourceDetection", "SourceDetection_mb23-music_caps_4sec_wave_type_continuous"), 
 ]
 
-assert experiment in ["sample", "preprocess", "espnet", "multimodel-llama", "test"]
+assert experiment in ["sample", "preprocess", "espnet", "multimodel-llama", "test", "SALMONN"]
 
 # test
 if experiment.startswith("test"):
@@ -60,14 +61,18 @@ elif experiment.startswith("preprocess"):
     task_root = "../../dynamic_superb/benchmark_tasks"
     save_root = "../../data"
     opt = -1
-    task, instance = options[opt]
-    json_path = os.path.join(task_root, task, instance, "instance.json")
-    save_path = os.path.join(save_root, task, instance)
-    multi_uttrs = 1
     os.chdir("api/preprocess")
-    COMMAND = f"python process_instance.py \
-                --json_path {json_path} \
-                --save_dir {save_path} "
+    for i in range(6):
+        opt = i
+        task, instance = options[opt]
+        json_path = os.path.join(task_root, task, instance, "instance.json")
+        save_path = os.path.join(save_root, task, instance)
+        multi_uttrs = 1
+        COMMAND = f"python process_instance.py \
+                    --json_path {json_path} \
+                    --save_dir {save_path} "
+        os.system(COMMAND)
+    exit(-1)
     if multi_uttrs: COMMAND += "--multi_uttrs "
 
 # inference
@@ -124,5 +129,28 @@ elif experiment.startswith("multimodel-llama"):
                 --data_path {data_path} \
                 --llama_path ckpts/llama_model_weights "
 
+elif experiment.startswith("SALMONN"):
+    paths = dict(
+        ckpt_path="salmonn_v1.pth", 
+        whisper_path="models--openai--whisper-large-v2/snapshots/696465c62215e36a9ab3f9b7672fe7749f1a1df5",
+        beats_path="BEATs_iter3_plus_AS2M_finetuned_on_AS2M_cpt2.pt",
+        vicuna_path="models--lmsys--vicuna-13b-v1.1/snapshots/1acf26f93742fafe91562253ec0e5d94e40a8bea",
+    )
+    for pth_name, pth in paths.items():
+        paths[pth_name] = os.path.join("ckpts", pth)
+    opt = 0
+    task, instance = options[opt]
+    wav_path = f"../data/{task}/{instance}"
+    output_path = f"../results/SALMONN/{task}"
+    os.chdir("SALMONN")
+    COMMAND = f"python3 cli_inference.py \
+                --ckpt_path {paths['ckpt_path']} \
+                --whisper_path {paths['whisper_path']} \
+                --beats_path {paths['beats_path']} \
+                --vicuna_path {paths['vicuna_path']} \
+                --wav_path {wav_path} \
+                --task {task} \
+                --instance {instance} \
+                --output_path {output_path}"
 
 os.system(COMMAND)

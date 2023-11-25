@@ -3,11 +3,24 @@ import os, json
 import random
 import time
 
-mode = "instance"
+mode = "test"
 
 assert mode in ["test", "spoken", "hugchat", "instance"]
 
 if mode.startswith("test"):
+    # Load model directly
+    from transformers import AutoTokenizer, AutoModelForCausalLM
+
+    cache_dir = "./SALMONN/ckpts/whisper"
+    model_name = "openai/whisper-large-v2"
+    #tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
+    #model = AutoModelForCausalLM.from_pretrained(model_name, cache_dir=cache_dir)
+    # Load model directly
+    from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq
+
+    processor = AutoProcessor.from_pretrained("openai/whisper-large-v2", cache_dir=cache_dir)
+    model = AutoModelForSpeechSeq2Seq.from_pretrained("openai/whisper-large-v2", cache_dir=cache_dir)
+    exit(-1)
     from jiwer import wer
 
     while True:

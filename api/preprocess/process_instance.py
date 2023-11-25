@@ -11,7 +11,7 @@ SEED = 42
 SAMPLE_NUM = 2000
 
 def main(json_path: Path, save_dir: Path, multi_uttrs: bool) -> None:
-    check_length = 1
+    check_length = 0
     save_dir.mkdir(parents=True, exist_ok=True)
 
     info = json.load(json_path.open(mode="r"))
@@ -21,8 +21,8 @@ def main(json_path: Path, save_dir: Path, multi_uttrs: bool) -> None:
     meta_data = defaultdict(dict)
 
     for index, example in tqdm(enumerate(dataset)):
-        #if index >= SAMPLE_NUM:
-        #    break
+        if index >= SAMPLE_NUM:
+           break
         file_path = Path(example["file"])
 
         audio = example["audio"]["array"]

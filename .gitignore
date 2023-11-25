@@ -8,4 +8,7 @@ SCTK
 secret_token.sh
 **/tmp
 img
+data
 results
+llama
+dlhlp-dynamic-superb-leaderboard
