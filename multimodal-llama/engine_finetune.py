@@ -30,10 +30,10 @@ def train_one_epoch(model: LLaMA_adapter,
         print('log_dir: {}'.format(log_writer.log_dir))
     for data_iter_step, batch in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
         # hank
-        examples = batch["input_ids"]
-        labels = batch["labels"]
-        example_mask = batch["input_mask"]
-        imgs = batch["audio"]
+        examples = batch["input_ids"].to(device)
+        labels = batch["labels"].to(device)
+        example_mask = batch["input_mask"].to(device)
+        imgs = batch["audio"].to(device)
 
         # we use a per iteration (instead of per epoch) lr scheduler
         if data_iter_step % accum_iter == 0:

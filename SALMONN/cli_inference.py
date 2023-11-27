@@ -16,6 +16,7 @@ import json
 import torch
 import argparse
 from collections import defaultdict
+from tqdm import tqdm
 from model import SALMONN
 
 def accuracy(origin: str, predict: str):
@@ -52,9 +53,7 @@ if __name__ == "__main__":
     pred_stat, label_stat = defaultdict(lambda: 0), defaultdict(lambda: 0)
     counter = 0
     acc, n_total = 0, len(metadata)
-    for filename, data in metadata.items():
-        if counter == 10: break
-        counter += 1
+    for filename, data in tqdm(metadata.items()):
         print("=====================================")
         wav_path = os.path.join(args.wav_path, filename)
         prompt_temp = "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:\n{instruction}\n\n### Response:"
@@ -79,8 +78,7 @@ if __name__ == "__main__":
             print(e)
             if args.debug:
                 import pdb; pdb.set_trace()
-    import pdb 
-    pdb.set_trace()
+    
     results = {
         "accuracy": acc / n_total, 
         "pred_count": pred_stat,

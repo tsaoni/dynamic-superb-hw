@@ -166,3 +166,4 @@ ckpts/
 output/
 core.*
 exp/
+wandb

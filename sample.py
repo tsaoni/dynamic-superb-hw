@@ -39,31 +39,47 @@ def main(args) -> None:
         # You should shuffle the dataset with the given seed (42).
         dataset = dataset.shuffle(SEED)
 
-        predictions, results = [], {}
+        predictions = []
         correct_count = 0
         model = BaseModel()
     
-        if "whisper" in args.save_path.__str__():
-            filename = f"{args.save_path.parent.__str__().split('/')[-1]}.json"
-            root = '/'.join(args.save_path.parent.__str__().split('/')[:-1])
-            filename = os.path.join(root, filename)
-            tmp = json.load(open(filename))
-            print(f"precalculate Accuracy: {tmp['accuracy']:.3f}%")
-            tmp = tmp['predictions']
-            prefix = f"{args.save_path.__str__().split('/')[3]}_"
-            for t in tmp:
-                file, pred = t['id'], t['pred']
-                results[file.replace(prefix, "")] = pred
-        else:
-            res_path = os.path.join(args.save_path.parent, "exp/asr_train_asr_whisper_full_correct_specaug_raw_en_whisper_multilingual/decode_asr_fsd_asr_model_valid.acc.ave/test/text")
-            lines = [x for x in open(res_path).read().split('\n') if len(x) > 0]
-            prefix = f"{args.save_path.__str__().split('/')[3]}_"
-            for l in lines:
-                if len(l.split()) > 1:
-                    file, pred = l.split()
-                else: file, pred = l.split()[0], ""
-                results[file.replace(prefix, "")] = pred
-
+        if args.ensemble_type == "no":
+            results = {}
+            if "whisper" in args.save_path.__str__():
+                filename = f"{args.save_path.parent.__str__().split('/')[-1]}.json"
+                root = '/'.join(args.save_path.parent.__str__().split('/')[:-1])
+                filename = os.path.join(root, filename)
+                tmp = json.load(open(filename))
+                print(f"precalculate Accuracy: {tmp['accuracy']:.3f}%")
+                tmp = tmp['predictions']
+                prefix = f"{args.save_path.__str__().split('/')[3]}_"
+                for t in tmp:
+                    file, pred = t['id'], t['pred']
+                    results[file.replace(prefix, "")] = pred
+            else:
+                res_path = os.path.join(args.save_path.parent, "exp/asr_train_asr_whisper_full_correct_specaug_raw_en_whisper_multilingual/decode_asr_fsd_asr_model_valid.acc.ave/test/text")
+                lines = [x for x in open(res_path).read().split('\n') if len(x) > 0]
+                prefix = f"{args.save_path.__str__().split('/')[3]}_"
+                for l in lines:
+                    if len(l.split()) > 1:
+                        file, pred = l.split()
+                    else: file, pred = l.split()[0], ""
+                    results[file.replace(prefix, "")] = pred
+        elif args.ensemble_type == "v1":
+            results = defaultdict(dict)
+            pred_files = os.listdir("./results")
+            save_paths = [os.path.join("./results", p, args.task) for p in pred_files]
+            for sp, pf in zip(save_paths, pred_files):
+                filename = os.path.join(sp, f"{args.instance}.json")
+                tmp = json.load(open(filename))
+                print(f"precalculate Accuracy: {tmp['accuracy']:.3f}%")
+                tmp = tmp['predictions']
+                prefix = f"{args.instance}_"
+                for t in tmp:
+                    file, pred = t['id'], t['pred']
+                    results[pf][file.replace(prefix, "")] = pred
+            import pdb 
+            pdb.set_trace()
         for index, example in tqdm(enumerate(dataset)):
             if index >= SAMPLE_NUM:
                 break
@@ -217,6 +233,9 @@ def main(args) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", type=str, default="gen-predict")
+    parser.add_argument("--ensemble_type", type=str, default="no")
+    parser.add_argument("--task", type=str, default="")
+    parser.add_argument("--instance", type=str, default="")
     parser.add_argument("--json_path", type=Path, required=True)
     parser.add_argument("--save_path", type=Path, required=True)
     parser.add_argument("--download_dir", type=Path, default=None)

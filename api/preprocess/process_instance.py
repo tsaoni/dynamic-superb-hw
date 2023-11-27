@@ -8,26 +8,31 @@ from datasets import load_dataset
 from tqdm import tqdm
 
 SEED = 42
-SAMPLE_NUM = 2000
+SAMPLE_NUM = 10000
 
-def main(json_path: Path, save_dir: Path, multi_uttrs: bool) -> None:
+
+
+def main(json_path: Path, save_dir: Path, multi_uttrs: bool, dataset=None) -> None:
     check_length = 0
     save_dir.mkdir(parents=True, exist_ok=True)
 
-    info = json.load(json_path.open(mode="r"))
-    dataset = load_dataset(info["path"], revision=info["version"], split="test")
+    if dataset is None:
+        info = json.load(json_path.open(mode="r"))
+        dataset = load_dataset(info["path"], revision=info["version"], split="test")
+        task_prefix = info["name"]
+    else: task_prefix = save_dir.__str__().split('/')[-1]
     dataset = dataset.shuffle(SEED)
 
     meta_data = defaultdict(dict)
 
     for index, example in tqdm(enumerate(dataset)):
-        if index >= SAMPLE_NUM:
+        if SAMPLE_NUM > 0 and index >= SAMPLE_NUM:
            break
         file_path = Path(example["file"])
 
         audio = example["audio"]["array"]
         sr = example["audio"]["sampling_rate"]
-        task_prefix = info["name"]
+        #task_prefix = info["name"]
         save_path = save_dir / f"{task_prefix}_{file_path.name}"
         sf.write(save_path, audio, sr)
 
@@ -57,8 +62,23 @@ def main(json_path: Path, save_dir: Path, multi_uttrs: bool) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--json_path", type=Path, required=True)
-    parser.add_argument("--save_dir", type=Path, required=True)
-    parser.add_argument("--multi_uttrs", action="store_true", default=False)
-    main(**vars(parser.parse_args()))
+    mode = "hf"
+    assert mode in ["cmd", "hf"]
+    if mode == "cmd":
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--json_path", type=Path, required=True)
+        parser.add_argument("--save_dir", type=Path, required=True)
+        parser.add_argument("--multi_uttrs", action="store_true", default=False)
+        main(**vars(parser.parse_args()))
+    elif mode == "hf":
+        huggingface_ds = [
+            "BigSuperbPrivate/SpeechTextMatching_LibrispeechTrainClean100", 
+            "BigSuperbPrivate/NoiseSNRLevelPredictionGaussian_VoxcelebMusan", 
+            "BigSuperbPrivate/SpoofDetection_Asvspoof2017", 
+            "BigSuperbPrivate/DialogueActClassification_DailyTalk", 
+            "BigSuperbPrivate/SpeakerCounting_LibrittsTrainClean100", 
+        ]
+        for d in huggingface_ds:
+            dataset = load_dataset(d, split="train")
+            save_dir = f"../../data/{d}"
+            main("", Path(save_dir), False, dataset)

@@ -1,25 +1,16 @@
-[2023-11-13 22:32:22] [INFO] pretrained_path: ckpts/dynamic-superb/whisper-llama-latest.pth
-[2023-11-13 22:32:22] [INFO] result_path: ../results/whisper/SpeechTextMatching
-[2023-11-13 22:32:22] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
-[2023-11-13 22:32:22] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
-[2023-11-13 22:32:34] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
-[2023-11-13 22:32:34] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
-[2023-11-13 22:32:44] [INFO] Loading faiss with AVX2 support.
-[2023-11-13 22:32:44] [INFO] Successfully loaded faiss with AVX2 support.
-[2023-11-13 22:32:55] [INFO] <All keys matched successfully>
-[2023-11-13 22:32:58] [INFO] EnvironmentalSoundClassification_ESC50-Animals
-[2023-11-13 22:32:58] [INFO] Dataset not found
-[2023-11-13 22:35:44] [INFO] pretrained_path: ckpts/dynamic-superb/whisper-llama-latest.pth
-[2023-11-13 22:35:44] [INFO] result_path: ../results/whisper/SpeechTextMatching
-[2023-11-13 22:35:44] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
-[2023-11-13 22:35:44] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
-[2023-11-13 22:35:56] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
-[2023-11-13 22:35:56] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
-[2023-11-13 22:36:06] [INFO] Loading faiss with AVX2 support.
-[2023-11-13 22:36:06] [INFO] Successfully loaded faiss with AVX2 support.
-[2023-11-13 22:36:18] [INFO] <All keys matched successfully>
-[2023-11-13 22:36:21] [INFO] SpeechTextMatching_LJSpeech
-[2023-11-13 22:41:17] [INFO] 1597 / 2000
-[2023-11-13 22:41:17] [INFO] ====================================================================================================
-[2023-11-13 22:41:17] [INFO] 
-[2023-11-13 22:41:17] [INFO] Dataset not found
+[2023-11-26 13:12:05] [INFO] pretrained_path: ckpts/dynamic-superb/whisper-llama-latest.pth
+[2023-11-26 13:12:05] [INFO] result_path: ../results/whisper/SpeechTextMatching
+[2023-11-26 13:43:31] [INFO] pretrained_path: ckpts/dynamic-superb/whisper-llama-latest.pth
+[2023-11-26 13:43:31] [INFO] result_path: ../results/whisper/SpeechTextMatching
+[2023-11-26 13:43:31] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
+[2023-11-26 13:43:31] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
+[2023-11-26 13:43:49] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
+[2023-11-26 13:43:49] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
+[2023-11-26 13:43:59] [INFO] Loading faiss with AVX2 support.
+[2023-11-26 13:43:59] [INFO] Successfully loaded faiss with AVX2 support.
+[2023-11-26 13:44:11] [INFO] <All keys matched successfully>
+[2023-11-26 13:44:14] [INFO] SpeechTextMatching_LJSpeech
+[2023-11-26 13:49:18] [INFO] 1597 / 2000
+[2023-11-26 13:49:18] [INFO] ====================================================================================================
+[2023-11-26 13:49:18] [INFO] 
+[2023-11-26 13:49:18] [INFO] Dataset not found

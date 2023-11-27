@@ -1,14 +1,16 @@
-[2023-11-13 22:46:56] [INFO] pretrained_path: ckpts/dynamic-superb/whisper-llama-latest.pth
-[2023-11-13 22:46:56] [INFO] result_path: ../results/whisper/SpoofDetection
-[2023-11-13 22:46:56] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
-[2023-11-13 22:46:56] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
-[2023-11-13 22:47:07] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
-[2023-11-13 22:47:07] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
-[2023-11-13 22:47:17] [INFO] Loading faiss with AVX2 support.
-[2023-11-13 22:47:17] [INFO] Successfully loaded faiss with AVX2 support.
-[2023-11-13 22:47:28] [INFO] <All keys matched successfully>
-[2023-11-13 22:47:31] [INFO] SpoofDetection_ASVspoof2017
-[2023-11-13 22:50:56] [INFO] 1460 / 2000
-[2023-11-13 22:50:56] [INFO] ====================================================================================================
-[2023-11-13 22:50:56] [INFO] 
-[2023-11-13 22:50:56] [INFO] Dataset not found
+[2023-11-26 13:12:19] [INFO] pretrained_path: ckpts/dynamic-superb/whisper-llama-latest.pth
+[2023-11-26 13:12:19] [INFO] result_path: ../results/whisper/SpoofDetection
+[2023-11-26 13:53:10] [INFO] pretrained_path: ckpts/dynamic-superb/whisper-llama-latest.pth
+[2023-11-26 13:53:10] [INFO] result_path: ../results/whisper/SpoofDetection
+[2023-11-26 13:53:10] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
+[2023-11-26 13:53:10] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
+[2023-11-26 13:53:27] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
+[2023-11-26 13:53:27] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
+[2023-11-26 13:53:44] [INFO] Loading faiss with AVX2 support.
+[2023-11-26 13:53:44] [INFO] Successfully loaded faiss with AVX2 support.
+[2023-11-26 13:54:10] [INFO] <All keys matched successfully>
+[2023-11-26 13:54:13] [INFO] SpoofDetection_ASVspoof2017
+[2023-11-26 13:57:43] [INFO] 1460 / 2000
+[2023-11-26 13:57:43] [INFO] ====================================================================================================
+[2023-11-26 13:57:43] [INFO] 
+[2023-11-26 13:57:43] [INFO] Dataset not found

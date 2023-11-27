@@ -1,12 +1,26 @@
-[2023-11-13 22:30:54] [INFO] pretrained_path: ckpts/dynamic-superb/whisper-llama-latest.pth
-[2023-11-13 22:30:54] [INFO] result_path: ../results/whisper/EnvironmentalSoundClassification
-[2023-11-13 22:30:54] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
-[2023-11-13 22:30:54] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
-[2023-11-13 22:31:05] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
-[2023-11-13 22:31:05] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
-[2023-11-13 22:31:15] [INFO] Loading faiss with AVX2 support.
-[2023-11-13 22:31:15] [INFO] Successfully loaded faiss with AVX2 support.
-[2023-11-13 22:31:27] [INFO] <All keys matched successfully>
-[2023-11-13 22:31:30] [INFO] EnvironmentalSoundClassification_ESC50-Animals
-[2023-11-13 22:32:06] [INFO] 46 / 400
-[2023-11-13 22:32:06] [INFO] ====================================================================================================
+[2023-11-26 13:11:58] [INFO] pretrained_path: ckpts/dynamic-superb/whisper-llama-latest.pth
+[2023-11-26 13:11:58] [INFO] result_path: ../results/whisper/EnvironmentalSoundClassification
+[2023-11-26 13:39:12] [INFO] pretrained_path: ckpts/dynamic-superb/whisper-llama-latest.pth
+[2023-11-26 13:39:12] [INFO] result_path: ../results/whisper/EnvironmentalSoundClassification
+[2023-11-26 13:39:12] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
+[2023-11-26 13:39:12] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
+[2023-11-26 13:39:39] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
+[2023-11-26 13:39:39] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
+[2023-11-26 13:40:08] [INFO] Loading faiss with AVX2 support.
+[2023-11-26 13:40:08] [INFO] Successfully loaded faiss with AVX2 support.
+[2023-11-26 13:40:35] [INFO] <All keys matched successfully>
+[2023-11-26 13:40:38] [INFO] EnvironmentalSoundClassification_ESC50-Animals
+[2023-11-26 13:41:37] [INFO] pretrained_path: ckpts/dynamic-superb/whisper-llama-latest.pth
+[2023-11-26 13:41:37] [INFO] result_path: ../results/whisper/EnvironmentalSoundClassification
+[2023-11-26 13:41:37] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
+[2023-11-26 13:41:37] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
+[2023-11-26 13:41:55] [INFO] Reloaded SentencePiece model from ckpts/llama_model_weights/tokenizer.model
+[2023-11-26 13:41:55] [INFO] #words: 32000 - BOS ID: 1 - EOS ID: 2
+[2023-11-26 13:42:10] [INFO] Loading faiss with AVX2 support.
+[2023-11-26 13:42:10] [INFO] Successfully loaded faiss with AVX2 support.
+[2023-11-26 13:42:29] [INFO] <All keys matched successfully>
+[2023-11-26 13:42:32] [INFO] EnvironmentalSoundClassification_ESC50-Animals
+[2023-11-26 13:43:21] [INFO] 46 / 400
+[2023-11-26 13:43:21] [INFO] ====================================================================================================
+[2023-11-26 13:43:21] [INFO] 
+[2023-11-26 13:43:21] [INFO] Dataset not found

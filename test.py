@@ -1,7 +1,8 @@
-import jiwer
+#import jiwer
 import os, json
 import random
 import time
+import torch
 
 mode = "test"
 
@@ -11,15 +12,16 @@ if mode.startswith("test"):
     # Load model directly
     from transformers import AutoTokenizer, AutoModelForCausalLM
 
-    cache_dir = "./SALMONN/ckpts/whisper"
-    model_name = "openai/whisper-large-v2"
-    #tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
-    #model = AutoModelForCausalLM.from_pretrained(model_name, cache_dir=cache_dir)
+    cache_dir = "./NExT-GPT/ckpt/delta_ckpt/nextgpt/7b_tiva_v0"
+    model_name = "ChocoWu/nextgpt_7b_tiva_v0"
+    tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
+    model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto", cache_dir=cache_dir, 
+                                                    load_in_8bit=True, torch_dtype=torch.float16)
     # Load model directly
-    from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq
+    # from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq
 
-    processor = AutoProcessor.from_pretrained("openai/whisper-large-v2", cache_dir=cache_dir)
-    model = AutoModelForSpeechSeq2Seq.from_pretrained("openai/whisper-large-v2", cache_dir=cache_dir)
+    # processor = AutoProcessor.from_pretrained("openai/whisper-large-v2", cache_dir=cache_dir)
+    # model = AutoModelForSpeechSeq2Seq.from_pretrained("openai/whisper-large-v2", cache_dir=cache_dir)
     exit(-1)
     from jiwer import wer
 
@@ -101,3 +103,7 @@ elif mode.startswith("hugchat"):
         query_result = chatbot.query(query.format(instr=instr))
         print(query_result.text) # or query_result.text or query_result["text"]
         time.sleep(20)
+#python -m fastchat.model.apply_delta --base  delta_ckpt/models--lmsys--vicuna-13b-delta-v0/snapshots/3082b9f4b63712f003c3d751a4a737606c2e68f7 --target pretrained_ckpt/vicuna_ckpt/13b_v0/  --delta pretrained_ckpt/vicuna_ckpt/models--meta-llama--Llama-2-13b-chat-hf/snapshots/c2f3ec81aac798ae26dcc57799a994dfbf521496
+
+
+# python /home/yuling/miniconda3/lib/python3.10/site-packages/transformers/models/llama/convert_llama_weights_to_hf.py  --input_dir  llama-2-13b  --model_size 13B --output_dir tmp 

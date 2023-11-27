@@ -2,8 +2,9 @@ import os
 from argparse import Namespace
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+os.environ["use_wandb"] = "true"
 
-experiment = "SALMONN"
+experiment = "sample"
 options = [
     ("EnvironmentalSoundClassification", "EnvironmentalSoundClassification_ESC50-Animals"), 
     ("SpeechTextMatching", "SpeechTextMatching_LJSpeech"), 
@@ -15,7 +16,9 @@ options = [
     #("SourceDetection", "SourceDetection_mb23-music_caps_4sec_wave_type_continuous"), 
 ]
 
-assert experiment in ["sample", "preprocess", "espnet", "multimodel-llama", "test", "SALMONN"]
+assert experiment in [
+    "sample", "preprocess", "espnet", "multimodel-llama", "test", "salmonn", "nextgpt", "ltu"
+]
 
 # test
 if experiment.startswith("test"):
@@ -24,18 +27,23 @@ if experiment.startswith("test"):
 elif experiment.startswith("sample"):
     task_root = "dynamic_superb/benchmark_tasks"
     save_root = "results/whisper"
-    loop = 0
+    loop = 1
     if loop:
-        for i in range(6):
+        for i in range(1):
             opt = i
             mode = "gen-predict"
+            ensemble_type = "v1"
             task, instance = options[opt]
             json_path = os.path.join(task_root, task, instance, "instance.json")
             save_path = os.path.join(save_root, task, instance, "prediction.json")
             download_dir = os.environ.get("HF_DATASETS_CACHE")
             assert mode in ["gen-predict", "analysis"]
+            assert ensemble_type in ["no", "v1"]
             COMMAND = f"python sample.py \
                         --mode {mode} \
+                        --task {task} \
+                        --instance {instance} \
+                        --ensemble_type {ensemble_type} \
                         --json_path {json_path} \
                         --save_path {save_path} \
                         --download_dir {download_dir} \
@@ -62,7 +70,7 @@ elif experiment.startswith("preprocess"):
     save_root = "../../data"
     opt = -1
     os.chdir("api/preprocess")
-    for i in range(6):
+    for i in range(1):
         opt = i
         task, instance = options[opt]
         json_path = os.path.join(task_root, task, instance, "instance.json")
@@ -77,22 +85,22 @@ elif experiment.startswith("preprocess"):
 
 # inference
 elif experiment.startswith("espnet"):
-    mode = "store-result"
-    opt = 5
+    mode = "infer"
+    opt = 0
+    assert mode in ["data-prepare", "infer", "store-result", "all"]
     task, instance = options[opt]
-    os.environ["DATA_DIR"] = f"/tmp2/yuling/dynamic-superb/data/{task}"
-    assert mode in ["data-prepare", "infer", "store-result"]
-    
-    if mode == "data-prepare":
+    os.environ["DATA_DIR"] = f"/tmp2/yuling/dynamic-superb-hw/data/{task}"
+    if mode in ["data-prepare"]:
         os.chdir("espnet-whisper/egs2/dynamic_superb")
         COMMAND = """
             bash run.sh --stage 1 --stop_stage 5 ;
             python create_bigsuperb_prompt.py ;
             bash run.sh --stage 10 --stop_stage 10 ;
         """
-    elif mode == "infer":
-        train_dir = "asr_train_asr_whisper_full_correct_specaug_raw_en_whisper_multilingual"
+        os.system(COMMAND)
+    if mode in ["infer"]:
         os.chdir("espnet-whisper/egs2/dynamic_superb")
+        train_dir = "asr_train_asr_whisper_full_correct_specaug_raw_en_whisper_multilingual"
         COMMAND = f"""
             cp valid.acc.ave.pth exp/{train_dir}/ ;
             bash run.sh --stage 11 --stop_stage 11 --ngpu 1 ;
@@ -101,8 +109,9 @@ elif experiment.startswith("espnet"):
         # bash download_checkpoint.sh ;
         # bash run.sh --stage 11 --stop_stage 11 --ngpu 0 ;
         # mv valid.acc.ave.pth exp/{train_dir}/ ;
-    elif mode == "store-result":
-        save_root = "results"
+        os.system(COMMAND)
+    if mode in ["store-result"]:
+        save_root = "results/espnet"
         res_root = "espnet-whisper/egs2/dynamic_superb"
         res_dir = ["dump", "data", "exp"]
         source_dir = [os.path.join(res_root, d) for d in res_dir]
@@ -111,25 +120,62 @@ elif experiment.startswith("espnet"):
         import shutil
         for s, t in zip(source_dir, target_dir):
             shutil.move(s, t)
-        exit(-1)
+
+    exit(-1)
 
 # whisper-LLM
 elif experiment.startswith("multimodel-llama"):
-    opt = -1
     data_root = "../data"
-    task, instance = options[opt]
-    data_path = os.path.join(data_root, task)
     os.chdir("multimodal-llama")
-    COMMAND = f"echo '{instance}' > data/test_dataset.txt ; \
-                python dynamicsuperb_inference.py \
-                --model_path ckpts/dynamic-superb/whisper-llama-latest.pth \
-                --encoder_type whisper \
-                --output_dir ../results/whisper/{task} \
-                --dataset_list data/test_dataset.txt \
-                --data_path {data_path} \
-                --llama_path ckpts/llama_model_weights "
+    mode = "train"
+    assert mode in ["train", "val"]
+    if mode == "val":
+        eval_ckpt = 0
+        out_ckpt_pair = [
+            #("aud", None), 
+            ("cnt", "output/SpeechTextMatching_LibrispeechTrainClean100/ckpts/checkpoint-latest.pth"), 
+            ("deg", "output/NoiseSNRLevelPredictionGaussian_VoxcelebMusan/ckpts/checkpoint-latest.pth"), 
+            ("para", "output/SpoofDetection_Asvspoof2017/ckpts/checkpoint-latest.pth"), 
+            ("sem", "output/DialogueActClassification_DailyTalk/ckpts/checkpoint-latest.pth"), 
+            ("spk", "output/SpeakerCounting_LibrittsTrainClean100/ckpts/checkpoint-latest.pth"), 
+        ]
+        for i in range(6):
+            opt = i
+            task, instance = options[opt]
+            data_path = os.path.join(data_root, task)
+            if eval_ckpt is not None:
+                output_dir, ckpt_path = f"whisper-{out_ckpt_pair[eval_ckpt][0]}", out_ckpt_pair[eval_ckpt][1]
+                dataset_list = f"{out_ckpt_pair[eval_ckpt][0]}_test_dataset.txt"
+            else:
+                output_dir, ckpt_path = "whisper", "ckpts/dynamic-superb/whisper-llama-latest.pth"
+                dataset_list = f"test_dataset.txt"
+            COMMAND = f"echo '{instance}' > data/{dataset_list} ; \
+                        python dynamicsuperb_inference.py \
+                        --model_path {ckpt_path} \
+                        --encoder_type whisper \
+                        --output_dir ../results/{output_dir}/{task} \
+                        --dataset_list data/{dataset_list} \
+                        --data_path {data_path} \
+                        --llama_path ckpts/llama_model_weights "
+            os.system(COMMAND)
+        exit(-1)
+    elif mode == "train":
+        task = "BigSuperbPrivate"
+        instances = os.listdir(f"../data/{task}")
+        instance = instances[4] #'\n'.join(instances)
+        epochs = 1000
+        exp = instance #"total"
+        output_dir = f"./output/{exp}/ckpts"
+        log_dir = f"./output/{exp}/log"
+        dataset_list = f"data/{exp}_train_dataset.txt"
+        COMMAND = f"echo '{instance}' > {dataset_list} ; \
+                python dynamicsuperb_finetune.py \
+                    --output_dir {output_dir} \
+                    --log_dir {log_dir} \
+                    --epochs {epochs} \
+                    --dataset_list {dataset_list} "
 
-elif experiment.startswith("SALMONN"):
+elif experiment.startswith("salmonn"):
     paths = dict(
         ckpt_path="salmonn_v1.pth", 
         whisper_path="models--openai--whisper-large-v2/snapshots/696465c62215e36a9ab3f9b7672fe7749f1a1df5",
@@ -139,18 +185,43 @@ elif experiment.startswith("SALMONN"):
     for pth_name, pth in paths.items():
         paths[pth_name] = os.path.join("ckpts", pth)
     opt = 0
-    task, instance = options[opt]
-    wav_path = f"../data/{task}/{instance}"
-    output_path = f"../results/SALMONN/{task}"
     os.chdir("SALMONN")
-    COMMAND = f"python3 cli_inference.py \
-                --ckpt_path {paths['ckpt_path']} \
-                --whisper_path {paths['whisper_path']} \
-                --beats_path {paths['beats_path']} \
-                --vicuna_path {paths['vicuna_path']} \
-                --wav_path {wav_path} \
-                --task {task} \
-                --instance {instance} \
-                --output_path {output_path}"
+    for i in range(1, 6):
+        opt = i
+        task, instance = options[opt]
+        wav_path = f"../data/{task}/{instance}"
+        output_path = f"../results/SALMONN/{task}"
+        COMMAND = f"python3 cli_inference.py \
+                    --ckpt_path {paths['ckpt_path']} \
+                    --whisper_path {paths['whisper_path']} \
+                    --beats_path {paths['beats_path']} \
+                    --vicuna_path {paths['vicuna_path']} \
+                    --wav_path {wav_path} \
+                    --task {task} \
+                    --instance {instance} \
+                    --output_path {output_path} "
+        os.system(COMMAND)
+    exit(-1)
+
+elif experiment.startswith("nextgpt"):
+    os.chdir("NExT-GPT/code")
+    #mode = "train"
+    #assert mode in ["train", "val"]
+    COMMAND = f"python inference.py"
+
+elif experiment.startswith("ltu"):
+    os.chdir("ltu")
+    for i in range(2, 6):
+        opt = i
+        task, instance = options[opt]
+        wav_path = f"../data/{task}/{instance}"
+        output_path = f"../results/ltu/{task}"
+        COMMAND = f"python ltu2_api_demo.py \
+                    --wav_path {wav_path} \
+                    --task {task} \
+                    --instance {instance} \
+                    --output_path {output_path} "
+        os.system(COMMAND)
+    exit(-1)
 
 os.system(COMMAND)

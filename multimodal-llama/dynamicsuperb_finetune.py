@@ -16,6 +16,7 @@ import json
 import numpy as np
 import os
 import time
+import wandb
 from pathlib import Path
 
 from engine_finetune import train_one_epoch, val_one_epoch
@@ -30,18 +31,18 @@ from datasets import load_dataset, Audio, load_from_disk, concatenate_datasets
 
 def get_args_parser():
     parser = argparse.ArgumentParser('imagebind-llm pre-training', add_help=False)
-    parser.add_argument('--batch_size', default=64, type=int,
+    parser.add_argument('--batch_size', default=16, type=int,
                         help='Batch size per GPU (effective batch size is batch_size * accum_iter * # gpus')
-    parser.add_argument('--epochs', default=400, type=int)
+    parser.add_argument('--epochs', default=1, type=int)
     parser.add_argument('--accum_iter', default=1, type=int,
                         help='Accumulate gradient iterations (for increasing the effective batch size under memory constraints)')
 
     # Model parameters
-    parser.add_argument('--llama_type', default='7B_chinese', type=str,
+    parser.add_argument('--llama_type', default='7B', type=str,
                         help='Type of LLaMA model') #
-    parser.add_argument('--llama_path', default='/path/to/llama', type=str,
+    parser.add_argument('--llama_path', default='ckpts/llama_model_weights', type=str,
                         help='path to LLaMA pretrained checkpoint')
-    parser.add_argument('--pretrained_path', default='/path/to/pretrained', type=str,
+    parser.add_argument('--pretrained_path', default='ckpts/dynamic-superb/whisper-llama-latest.pth', type=str,
                         help='path to checkpoint from pretrain stage')
     parser.add_argument('--max_words', default=512, type=int,
                         help='max number of input words')
@@ -91,7 +92,8 @@ def get_args_parser():
                         help='url used to set up distributed training')
     
     parser.add_argument('--encoder_type', default='whisper', type=str)
-    parser.add_argument('--data_path', default="/path/to/data_path",type=str)
+    parser.add_argument('--data_path', default="../data/BigSuperbPrivate",type=str)
+    parser.add_argument('--dataset_list', default="",type=str)
     return parser
 
 
@@ -161,7 +163,7 @@ def main(args):
     # hank
     tokenizer = Tokenizer(model_path=f"{args.llama_path}/tokenizer.model")
     data_path = Path(args.data_path)
-    all_datasets = open("data/train_dataset.txt").read().split("\n")
+    all_datasets = open(args.dataset_list).read().split("\n")
     all_train_dataset = BigSuperbDataset(data_path, tokenizer, data_path2=None, audio_input_type=args.encoder_type, allowed_datasets=all_datasets)
     print("All train dataset size:", len(all_train_dataset))
 
@@ -192,6 +194,8 @@ def main(args):
         log_writer = None
 
 
+    if os.environ.get("use_wandb") == "true":
+        wandb.init(project="dynamicsuperb_finetune", name=args.output_dir)
     print(f"Start training for {args.epochs} epochs")
     start_time = time.time()
     for epoch in range(args.start_epoch, args.epochs):
@@ -225,6 +229,11 @@ def main(args):
         log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                      'epoch': epoch,
                      **{f'val_{k}': v for k, v in train_stats.items()}}
+        
+        if os.environ.get("use_wandb") == "true":
+            wandb.log({**{f'train/{k}': v for k, v in train_stats.items()},
+                     'global/epoch': epoch,
+                     **{f'val/{k}': v for k, v in train_stats.items()}})
 
         if args.output_dir and misc.is_main_process():
             if log_writer is not None:
