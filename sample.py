@@ -20,7 +20,7 @@ from utils import *
 
 # DO NOT change the following constants.
 SEED = 42
-SAMPLE_NUM = 3000
+SAMPLE_NUM = 2000
 
 def main(args) -> None:
 
@@ -45,7 +45,8 @@ def main(args) -> None:
     
         if args.ensemble_type == "no":
             results = {}
-            if "whisper" in args.save_path.__str__():
+            #if "whisper" in args.save_path.__str__():
+            if True:
                 filename = f"{args.save_path.parent.__str__().split('/')[-1]}.json"
                 root = '/'.join(args.save_path.parent.__str__().split('/')[:-1])
                 filename = os.path.join(root, filename)
@@ -55,7 +56,7 @@ def main(args) -> None:
                 prefix = f"{args.save_path.__str__().split('/')[3]}_"
                 for t in tmp:
                     file, pred = t['id'], t['pred']
-                    results[file.replace(prefix, "")] = pred
+                    results[file.split('/')[-1].replace(prefix, "")] = pred
             else:
                 res_path = os.path.join(args.save_path.parent, "exp/asr_train_asr_whisper_full_correct_specaug_raw_en_whisper_multilingual/decode_asr_fsd_asr_model_valid.acc.ave/test/text")
                 lines = [x for x in open(res_path).read().split('\n') if len(x) > 0]
@@ -67,19 +68,23 @@ def main(args) -> None:
                     results[file.replace(prefix, "")] = pred
         elif args.ensemble_type == "v1":
             results = defaultdict(dict)
-            pred_files = os.listdir("./results")
+            pred_files, new_pred_files = os.listdir("./results"), []
             save_paths = [os.path.join("./results", p, args.task) for p in pred_files]
             for sp, pf in zip(save_paths, pred_files):
                 filename = os.path.join(sp, f"{args.instance}.json")
-                tmp = json.load(open(filename))
-                print(f"precalculate Accuracy: {tmp['accuracy']:.3f}%")
-                tmp = tmp['predictions']
-                prefix = f"{args.instance}_"
-                for t in tmp:
-                    file, pred = t['id'], t['pred']
-                    results[pf][file.replace(prefix, "")] = pred
-            import pdb 
-            pdb.set_trace()
+                if os.path.exists(filename):
+                    tmp = json.load(open(filename))
+                    print(f"precalculate Accuracy: {tmp['accuracy']:.3f}%")
+                    tmp = tmp['predictions']
+                    prefix = f"{args.instance}_"
+                    for t in tmp:
+                        file, pred = t['id'], t['pred']
+                        results[pf][file.split('/')[-1].replace(prefix, "")] = pred
+                    new_pred_files.append(pf)
+            pred_files = new_pred_files
+
+        labels = list(set(dataset['label']))
+        log = defaultdict(list)
         for index, example in tqdm(enumerate(dataset)):
             if index >= SAMPLE_NUM:
                 break
@@ -95,7 +100,19 @@ def main(args) -> None:
             #     print("error")
             #     exit(-1)
             
-            rnd_pred = results[file_name]
+            if args.ensemble_type == "no":
+                rnd_pred = label_project(results[file_name], labels=labels)[0] #results[file_name]
+            elif args.ensemble_type == "v1":
+                preds = [results[k][file_name] for k in pred_files]
+                proj_preds, proj_metas = [], []
+                for pred in preds:
+                    proj_pred, proj_meta = label_project(pred, labels=labels)
+                    proj_preds.append(proj_pred)
+                    proj_metas.append(proj_meta)
+                rnd_pred, en_meta = ensemble(proj_preds)
+                log["proj_meta"].append({k: v for k, v in zip(pred_files, proj_metas)})
+                log["en_meta"].append(en_meta)
+                
             pred = {"file": file_name, "prediction": rnd_pred, "label": text_label}
             if "instr" in args.save_path.__str__(): pred.update({"instruction": instr})
             predictions.append(pred)
@@ -108,8 +125,21 @@ def main(args) -> None:
         print(f"Total: {n_total}")
         print(f"Accuracy: {acc:.3f}%")
 
+        # print metadata
+        if args.ensemble_type == "v1":
+            print("projection metadata")
+            for pf in pred_files:
+                print(f"###{pf}")
+                cands = [item[pf]['n_cand'] for item in log['proj_meta']]
+                print(f"num of candidates >> min: {min(cands)} max: {max(cands)} avg: {sum(cands) / len(cands)} mode: {max(set(cands), key=cands.count)}")
+            print("ensemble metadata")
+            max_votes = [item['max_vote'] for item in log['en_meta']]
+            print(f"num of max vote >> min: {min(max_votes)} max: {max(max_votes)} avg: {sum(max_votes) / len(max_votes)} mode: {max(set(max_votes), key=max_votes.count)}")
+
+
         # save prediction
-        args.save_path.parent.mkdir(exist_ok=True)
+        os.makedirs(args.save_path.parent.__str__(), exist_ok=True)
+        #args.save_path.parent.mkdir(exist_ok=True)
         with args.save_path.open(mode="w") as f:
             json.dump(predictions, f, indent=4)
     elif args.mode == "analysis":

@@ -1,5 +1,7 @@
 from typing import List, Optional, Tuple
 import numpy as np
+import random
+from collections import Counter
 
 instructions = {
     "match": [
@@ -44,3 +46,28 @@ class BaseModel:
 
         # Since this is a dummy model, we just return the inputs.
         return speech_inputs, text_inputs
+    
+def label_project(pred, labels=None):
+    candidates, meta = [], {}
+    for label in labels:
+        if label.lower() in pred.lower():
+            candidates.append(label)
+    if len(candidates) == 0:
+        pred = random.sample(labels, 1)[0]
+    else: pred = random.sample(candidates, 1)[0]
+    meta["n_cand"] = len(candidates)
+    return pred, meta
+
+def ensemble(preds, weight=None):
+    mode = "max"
+    meta = {}
+    assert mode in ["max", "sample"]
+    stats = Counter(preds)
+    max_num = max(stats.values())
+    meta["max_vote"] = max_num
+    if mode == 'max':
+        labels = [k for k, v in stats.items() if v == max_num]
+        return random.sample(labels, 1)[0], meta
+
+    elif mode == "sample":
+        return random.sample(preds, 1)[0], meta

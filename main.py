@@ -1,10 +1,10 @@
 import os
 from argparse import Namespace
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "5"
 os.environ["use_wandb"] = "true"
 
-experiment = "sample"
+experiment = "multimodel-llama"
 options = [
     ("EnvironmentalSoundClassification", "EnvironmentalSoundClassification_ESC50-Animals"), 
     ("SpeechTextMatching", "SpeechTextMatching_LJSpeech"), 
@@ -26,13 +26,16 @@ if experiment.startswith("test"):
 
 elif experiment.startswith("sample"):
     task_root = "dynamic_superb/benchmark_tasks"
-    save_root = "results/whisper"
+    ensemble_type = "no"
+    if ensemble_type != "no":
+        save_root = f"results/{ensemble_type}"
+    else: save_root = "results/SALMONN"
+
     loop = 1
     if loop:
-        for i in range(1):
+        for i in range(0, 6):
             opt = i
             mode = "gen-predict"
-            ensemble_type = "v1"
             task, instance = options[opt]
             json_path = os.path.join(task_root, task, instance, "instance.json")
             save_path = os.path.join(save_root, task, instance, "prediction.json")
@@ -127,24 +130,26 @@ elif experiment.startswith("espnet"):
 elif experiment.startswith("multimodel-llama"):
     data_root = "../data"
     os.chdir("multimodal-llama")
-    mode = "train"
+    mode = "val"
     assert mode in ["train", "val"]
     if mode == "val":
         eval_ckpt = 0
+        n_epoch = 40
+        ckpt_name = f"model-{n_epoch}.pth"
         out_ckpt_pair = [
             #("aud", None), 
-            ("cnt", "output/SpeechTextMatching_LibrispeechTrainClean100/ckpts/checkpoint-latest.pth"), 
-            ("deg", "output/NoiseSNRLevelPredictionGaussian_VoxcelebMusan/ckpts/checkpoint-latest.pth"), 
-            ("para", "output/SpoofDetection_Asvspoof2017/ckpts/checkpoint-latest.pth"), 
-            ("sem", "output/DialogueActClassification_DailyTalk/ckpts/checkpoint-latest.pth"), 
-            ("spk", "output/SpeakerCounting_LibrittsTrainClean100/ckpts/checkpoint-latest.pth"), 
+            ("cnt", f"output/SpeechTextMatching_LibrispeechTrainClean100/ckpts/{ckpt_name}"), 
+            ("deg", f"output/NoiseSNRLevelPredictionGaussian_VoxcelebMusan/ckpts/{ckpt_name}"), 
+            ("para", f"output/SpoofDetection_Asvspoof2017/ckpts/{ckpt_name}"), 
+            ("sem", f"output/DialogueActClassification_DailyTalk/ckpts/{ckpt_name}"), 
+            ("spk", f"output/SpeakerCounting_LibrittsTrainClean100/ckpts/{ckpt_name}"), 
         ]
         for i in range(6):
             opt = i
             task, instance = options[opt]
             data_path = os.path.join(data_root, task)
             if eval_ckpt is not None:
-                output_dir, ckpt_path = f"whisper-{out_ckpt_pair[eval_ckpt][0]}", out_ckpt_pair[eval_ckpt][1]
+                output_dir, ckpt_path = f"whisper-{out_ckpt_pair[eval_ckpt][0]}-{n_epoch}", out_ckpt_pair[eval_ckpt][1]
                 dataset_list = f"{out_ckpt_pair[eval_ckpt][0]}_test_dataset.txt"
             else:
                 output_dir, ckpt_path = "whisper", "ckpts/dynamic-superb/whisper-llama-latest.pth"
