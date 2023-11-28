@@ -1,10 +1,10 @@
 import os
 from argparse import Namespace
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "5"
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 os.environ["use_wandb"] = "true"
 
-experiment = "multimodel-llama"
+experiment = "sample"
 options = [
     ("EnvironmentalSoundClassification", "EnvironmentalSoundClassification_ESC50-Animals"), 
     ("SpeechTextMatching", "SpeechTextMatching_LJSpeech"), 
@@ -26,7 +26,7 @@ if experiment.startswith("test"):
 
 elif experiment.startswith("sample"):
     task_root = "dynamic_superb/benchmark_tasks"
-    ensemble_type = "no"
+    ensemble_type = "v1"
     if ensemble_type != "no":
         save_root = f"results/{ensemble_type}"
     else: save_root = "results/SALMONN"
@@ -133,8 +133,8 @@ elif experiment.startswith("multimodel-llama"):
     mode = "val"
     assert mode in ["train", "val"]
     if mode == "val":
-        eval_ckpt = 0
-        n_epoch = 40
+        eval_ckpt = 4
+        n_epoch = 10
         ckpt_name = f"model-{n_epoch}.pth"
         out_ckpt_pair = [
             #("aud", None), 

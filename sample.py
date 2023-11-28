@@ -68,7 +68,7 @@ def main(args) -> None:
                     results[file.replace(prefix, "")] = pred
         elif args.ensemble_type == "v1":
             results = defaultdict(dict)
-            pred_files, new_pred_files = os.listdir("./results"), []
+            pred_files, new_pred_files = ["whisper", "SALMONN"], [] #os.listdir("./results"), []
             save_paths = [os.path.join("./results", p, args.task) for p in pred_files]
             for sp, pf in zip(save_paths, pred_files):
                 filename = os.path.join(sp, f"{args.instance}.json")
